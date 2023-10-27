@@ -3,7 +3,6 @@ package generate
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"github.com/mxmrykov/L0/internal/models"
 	"math"
@@ -12,7 +11,7 @@ import (
 	"time"
 )
 
-func generateOrder() []byte {
+func GenerateOrder() *models.Order {
 	orderId := hash32bit()
 	var orderCount = 1 + rand.Intn(2)
 	items := make([]models.Item, orderCount)
@@ -38,12 +37,13 @@ func generateOrder() []byte {
 	generateOrderItems(order)
 	generateOrderPayment(order)
 	fmt.Println("NEW ORDER GENERATED")
-	ord, err := json.MarshalIndent(order, "", "\t")
-	if err != nil {
-		fmt.Printf("Error while converting order to json: %v", err)
-		return nil
-	}
-	return ord
+	return order
+	//ord, err := json.MarshalIndent(order, "", "\t")
+	//if err != nil {
+	//	fmt.Printf("Error while converting order to json: %v", err)
+	//	return nil
+	//}
+	//return ord
 }
 
 func generateOrderPayment(order *models.Order) {

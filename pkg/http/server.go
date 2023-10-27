@@ -2,21 +2,19 @@ package http
 
 import (
 	"context"
+	"github.com/mxmrykov/L0/config"
 	"net/http"
-	"time"
 )
 
 type Server struct {
 	httpServer *http.Server
 }
 
-func (s *Server) Start(PORT string) error {
+func (s *Server) Start(cfg *config.HTTP) error {
 	s.httpServer = &http.Server{
-		Addr:           ":" + PORT,
-		MaxHeaderBytes: 1 << 20,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		Addr: ":" + cfg.Port,
 	}
+
 	return s.httpServer.ListenAndServe()
 }
 
