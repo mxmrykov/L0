@@ -1,23 +1,27 @@
 package http
 
 import (
-	"context"
-	"github.com/mxmrykov/L0/config"
-	"net/http"
+	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
-	httpServer *http.Server
+	echo *echo.Echo
+	port string
 }
 
-func (s *Server) Start(cfg *config.HTTP) error {
-	s.httpServer = &http.Server{
-		Addr: ":" + cfg.Port,
+func NewServer() *Server {
+	return &Server{
+		echo: echo.New(),
+		port: ":8080",
 	}
-
-	return s.httpServer.ListenAndServe()
 }
 
-func (s *Server) Stop(ctx context.Context) error {
-	return s.httpServer.Shutdown(ctx)
+func (s *Server) Start(orderHandler echo.HandlerFunc, allOrdersHandler echo.HandlerFunc) error {
+	s.echo.GET("/:order", orderHandler)
+	s.echo.GET("/", allOrdersHandler)
+	return s.echo.Start(s.port)
+}
+
+func (s *Server) Echo() *echo.Echo {
+	return s.echo
 }

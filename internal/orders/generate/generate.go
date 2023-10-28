@@ -3,7 +3,6 @@ package generate
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"github.com/mxmrykov/L0/internal/models"
 	"math"
 	"math/rand"
@@ -18,7 +17,7 @@ func GenerateOrder() *models.Order {
 	for i := 0; i < orderCount; i += 1 {
 		items[i] = models.Item{0, "", 0, "", "", 0, "", 0, 0, "", 0}
 	}
-	order := &models.Order{
+	order := models.Order{
 		orderId[:len(orderId)-15],
 		"WBILMTESTTRACK",
 		"WBIL",
@@ -34,10 +33,9 @@ func GenerateOrder() *models.Order {
 		time.Now().Format(time.RFC3339),
 		"1",
 	}
-	generateOrderItems(order)
-	generateOrderPayment(order)
-	fmt.Println("NEW ORDER GENERATED")
-	return order
+	generateOrderItems(&order)
+	generateOrderPayment(&order)
+	return &order
 	//ord, err := json.MarshalIndent(order, "", "\t")
 	//if err != nil {
 	//	fmt.Printf("Error while converting order to json: %v", err)

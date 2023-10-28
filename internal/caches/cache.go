@@ -18,10 +18,9 @@ func NewCache() *OrderCache {
 	}
 }
 
-func (oc *OrderCache) CreateCache(or *models.Order) {
-
+func (oc *OrderCache) CreateCache(or models.Order) {
 	oc.mu.Lock()
-	oc.cache[or.OrderUid] = or
+	oc.cache[or.OrderUid] = &or
 	oc.mu.Unlock()
 	fmt.Printf("Cache written: %s\n", or.OrderUid)
 }

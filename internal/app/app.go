@@ -5,12 +5,10 @@ import (
 	"github.com/mxmrykov/L0/config"
 	"github.com/mxmrykov/L0/internal/caches"
 	nats "github.com/mxmrykov/L0/internal/nats"
+	"github.com/mxmrykov/L0/internal/orders/controller"
 	"github.com/mxmrykov/L0/internal/orders/generate"
 	"github.com/mxmrykov/L0/pkg/http"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 )
 
@@ -18,20 +16,27 @@ func Run(cfg *config.Config) {
 
 	ns := nats.NewNats(&cfg.Nats)
 
-	webServer := http.Server{}
-
-	serverStartingError := webServer.Start(&config.HTTP{})
-
-	if serverStartingError != nil {
-		log.Fatalf("Error at server starting: %v", serverStartingError)
-	}
-
 	fmt.Println("Nats server started, connection registered")
+	orderCache := caches.NewCache()
+
+	go func() {
+		for {
+			order := generate.GenerateOrder()
+			fmt.Println("Order sent")
+			err := ns.Publish(order)
+
+			if err != nil {
+				fmt.Printf("Error at publishing: %v\n", err)
+			}
+
+			time.Sleep(30 * time.Second)
+		}
+	}()
 
 	go func() {
 		for {
 			mes, err := ns.Subscribe()
-
+			fmt.Println("Order received")
 			if err != nil {
 				fmt.Printf("Error at subscribing: %v", err)
 			}
@@ -40,35 +45,36 @@ func Run(cfg *config.Config) {
 				fmt.Printf("Error at Unmarshaling: %v", err)
 			}
 
+			orderCache.CreateCache(*mes)
+
 			fmt.Println(cfg.Topic, ": ", mes.OrderUid)
 
-			time.Sleep(50 * time.Second)
+			time.Sleep(30 * time.Second)
 		}
 	}()
 
-	go func() {
-		for {
-			order := generate.GenerateOrder()
+	httpServer := http.NewServer()
+	orderController := controller.NewOrderController(orderCache)
 
-			err := ns.Publish(order)
+	serverStartingError := httpServer.Start(orderController.GetOrderController, orderController.GetAllOrders)
 
-			if err != nil {
-				fmt.Printf("Error at publishing: %v\n", err)
-			}
+	if serverStartingError != nil {
+		log.Fatalf("Error at server starting: %v", serverStartingError)
+	}
 
-			orderCache := caches.NewCache()
-			orderCache.CreateCache(order)
+	//
+	//httpServer.Echo().GET("/order/:order", func(c echo.Context) error {
+	//	order := orderController.GetOrderController(c)
+	//	response, err := json.MarshalIndent(order, "", "\t")
+	//	if err != nil {
+	//		fmt.Printf("Error at responsing: %v", err)
+	//	}
+	//	return c.JSONBlob(http2.StatusOK, response)
+	//})
+	//
 
-			time.Sleep(50 * time.Second)
-		}
-	}()
-
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
-	<-signalChan
-
-}
-
-func messageSender(ns *config.Nats) {
+	//signalChan := make(chan os.Signal, 1)
+	//signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	//<-signalChan
 
 }

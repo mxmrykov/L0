@@ -3,21 +3,18 @@ package httpHandlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mxmrykov/L0/internal/models"
+	"github.com/labstack/echo/v4"
+	"github.com/mxmrykov/L0/internal/caches"
 	"net/http"
 )
 
-func OrderHandler(order *models.Order, w http.ResponseWriter, r *http.Request) {
-
-	response, err := json.MarshalIndent(order, "", "\t")
+func OrderHandler(c echo.Context, os *caches.OrderCache) error {
+	response, err := json.MarshalIndent(os.GetOrderByUid(c.Param("uid")), "", "\t")
 
 	if err != nil {
 		fmt.Printf("Error at marshaling: %v", err)
+		return err
 	}
 
-	_, err = w.Write(response)
-
-	if err != nil {
-		fmt.Printf("Error at reponding order: %v", err)
-	}
+	return c.JSONBlob(http.StatusOK, response)
 }

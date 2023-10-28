@@ -51,19 +51,19 @@ func (ns *Nats) Publish(message *models.Order) error {
 
 func (ns *Nats) Subscribe() (*models.Order, error) {
 
+	var rc models.Order
+
 	ch := make(chan *models.Order)
 
 	_, err := ns.sc.Subscribe(ns.config.Topic, func(mes *stan.Msg) {
 
-		var msg *models.Order
-
-		err := json.Unmarshal(mes.Data, &msg)
+		err := json.Unmarshal(mes.Data, &rc)
 
 		if err != nil {
 			fmt.Printf("Error at Unmarshaling: %v", err)
 		}
 
-		ch <- msg
+		ch <- &rc
 	})
 
 	if err != nil {
@@ -71,8 +71,8 @@ func (ns *Nats) Subscribe() (*models.Order, error) {
 	}
 
 	select {
-	case message := <-ch:
-		return message, nil
+	case rc := <-ch:
+		return rc, nil
 	case <-time.After(60 * time.Second):
 		return nil, stan.ErrTimeout
 	}
