@@ -78,20 +78,4 @@ func Run(cfg *config.Config) {
 	if serverStartingError != nil {
 		log.Fatalf("Error at server starting: %v", serverStartingError)
 	}
-
-	//
-	//httpServer.Echo().GET("/order/:order", func(c echo.Context) error {
-	//	order := orderController.GetOrderController(c)
-	//	response, err := json.MarshalIndent(order, "", "\t")
-	//	if err != nil {
-	//		fmt.Printf("Error at responsing: %v", err)
-	//	}
-	//	return c.JSONBlob(http2.StatusOK, response)
-	//})
-	//
-
-	//signalChan := make(chan os.Signal, 1)
-	//signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
-	//<-signalChan
-
 }

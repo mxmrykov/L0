@@ -1,8 +1,6 @@
 package http
 
-import (
-	"github.com/labstack/echo/v4"
-)
+import "github.com/labstack/echo/v4"
 
 type Server struct {
 	echo *echo.Echo
@@ -20,8 +18,4 @@ func (s *Server) Start(orderHandler echo.HandlerFunc, allOrdersHandler echo.Hand
 	s.echo.GET("/:order", orderHandler)
 	s.echo.GET("/", allOrdersHandler)
 	return s.echo.Start(s.port)
-}
-
-func (s *Server) Echo() *echo.Echo {
-	return s.echo
 }

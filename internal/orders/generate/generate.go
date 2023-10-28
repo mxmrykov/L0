@@ -36,12 +36,6 @@ func GenerateOrder() *models.Order {
 	generateOrderItems(&order)
 	generateOrderPayment(&order)
 	return &order
-	//ord, err := json.MarshalIndent(order, "", "\t")
-	//if err != nil {
-	//	fmt.Printf("Error while converting order to json: %v", err)
-	//	return nil
-	//}
-	//return ord
 }
 
 func generateOrderPayment(order *models.Order) {
