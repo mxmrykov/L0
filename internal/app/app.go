@@ -7,7 +7,9 @@ import (
 	nats "github.com/mxmrykov/L0/internal/nats"
 	"github.com/mxmrykov/L0/internal/orders/controller"
 	"github.com/mxmrykov/L0/internal/orders/generate"
+	"github.com/mxmrykov/L0/internal/repository"
 	"github.com/mxmrykov/L0/pkg/http"
+	"github.com/mxmrykov/L0/pkg/postgres"
 	"log"
 	"time"
 )
@@ -17,7 +19,22 @@ func Run(cfg *config.Config) {
 	ns := nats.NewNats(&cfg.Nats)
 
 	fmt.Println("Nats server started, connection registered")
-	orderCache := caches.NewCache()
+
+	postgresConnection, err := postgres.Connect(&cfg.PG)
+
+	if err != nil {
+		fmt.Printf("Error at Postgre connection: %v", err)
+	}
+	defer postgresConnection.Close()
+
+	repo := repository.NewRepository(postgresConnection)
+	dbCreationError := repo.CreateTable()
+
+	if dbCreationError != nil {
+		fmt.Printf("Error at table creating: %v", dbCreationError)
+	}
+
+	orderCache := caches.NewCache(repo)
 
 	go func() {
 		for {
