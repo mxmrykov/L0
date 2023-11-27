@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
 # source code into the container.
 RUN --mount=type=cache,target=/go/pkg/mod/ \
     --mount=type=bind,target=. \
-    CGO_ENABLED=0 go build -o /bin/server ./cmd/app
+    CGO_ENABLED=0 go build -o /bin/server ./cmd/app/main.go
 
 ################################################################################
 # Create a new stage for running the application that contains the minimal

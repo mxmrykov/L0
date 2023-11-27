@@ -38,7 +38,7 @@ func NewNats(cfg *config.Nats) *Nats {
 	return &Nats{cfg, sc, nc}
 }
 
-func (ns *Nats) Publish(message *models.Order) error {
+func (ns *Nats) Publish(message models.Order) error {
 
 	ord, err := json.MarshalIndent(message, "", "\t")
 
@@ -61,6 +61,7 @@ func (ns *Nats) Subscribe() (*models.Order, error) {
 
 		if err != nil {
 			fmt.Printf("Error at Unmarshaling: %v", err)
+			return
 		}
 
 		ch <- &rc

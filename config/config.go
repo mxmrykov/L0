@@ -43,7 +43,9 @@ type (
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
 
-	err := cleanenv.ReadConfig("./config.yml", cfg)
+	path := "./config/config.yml"
+
+	err := cleanenv.ReadConfig(path, cfg)
 
 	if err != nil {
 		return nil, fmt.Errorf("Config error: %v", err)

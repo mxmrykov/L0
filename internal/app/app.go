@@ -35,17 +35,17 @@ func Run(cfg *config.Config) {
 	}
 
 	orderCache := caches.NewCache(repo)
+	orderCache.Preload()
 
 	go func() {
 		for {
 			order := generate.GenerateOrder()
 			fmt.Println("Order sent")
-			err := ns.Publish(order)
+			err := ns.Publish(*order)
 
 			if err != nil {
 				fmt.Printf("Error at publishing: %v\n", err)
 			}
-
 			time.Sleep(30 * time.Second)
 		}
 	}()
@@ -63,9 +63,6 @@ func Run(cfg *config.Config) {
 			}
 
 			orderCache.CreateCache(*mes)
-
-			fmt.Println(cfg.Topic, ": ", mes.OrderUid)
-
 			time.Sleep(30 * time.Second)
 		}
 	}()

@@ -22,16 +22,30 @@ func NewCache(repo *repository.Repo) *OrderCache {
 }
 
 func (oc *OrderCache) CreateCache(or models.Order) {
-	err := oc.dbRepo.SaveOrder(or)
 
+	err := oc.dbRepo.SaveOrder(or)
 	if err != nil {
-		fmt.Printf("Cannot insert order: %v", err)
+		fmt.Printf("Cannot insert order: %v\n", err)
 	}
 
 	oc.mu.Lock()
 	oc.cache[or.OrderUid] = &or
 	oc.mu.Unlock()
 	fmt.Printf("Cache written: %s\n", or.OrderUid)
+}
+
+func (oc *OrderCache) Preload() {
+
+	ors, err := oc.dbRepo.GetALl()
+	if err != nil {
+		fmt.Printf("Error at DB: %v\n", err)
+	}
+	fmt.Printf("DB returns len: %d\n", len(ors))
+	oc.mu.Lock()
+	for _, or := range ors {
+		oc.cache[or.OrderUid] = &or
+	}
+	oc.mu.Unlock()
 }
 
 func (oc *OrderCache) GetOrderByUid(uid string) *models.Order {
